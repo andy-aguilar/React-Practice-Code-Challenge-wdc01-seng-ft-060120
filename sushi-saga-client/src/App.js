@@ -9,6 +9,7 @@ class App extends Component {
 
   state = {
     sushis: [],
+    displaySushis: [],
     start: 0,
     end: 4,
     eaten: [],
@@ -21,7 +22,8 @@ class App extends Component {
     .then(resp => resp.json())
     .then(sushis => {
       this.setState({
-        sushis
+        sushis,
+        displaySushis: sushis,
       })
     })
   }
@@ -40,39 +42,23 @@ class App extends Component {
     })
   }
 
-  eatSushi = (eatenSushi) => {
-    if (this.state.moneyLeft < eatenSushi.price){
+  eatSushi = (sushi) => {
+    if (this.state.moneyLeft < sushi.price){
       alert("You're broke, dude!")
       return 
     }
-    else if (eatenSushi.eaten){
+    else if (sushi.eaten){
       alert("There ain't no sushi on that plate")
       return
     }
-    const sushiUrl = `${API}/${eatenSushi.id}`
-    let oldSushis = [...this.state.sushis]
-    const sushiObj={
-      eaten: true
-    }
-    const sushiConfig = {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(sushiObj)
-    }
-    fetch(sushiUrl, sushiConfig)
-    .then(resp => resp.json())
-    .then(sushi => {
+    const eatenSushi = {...sushi, eaten: true}
       this.setState({
-        sushis: oldSushis.map(oldSushi => {
-          return oldSushi.id === sushi.id ? sushi : oldSushi
+        displaySushis: [...this.state.displaySushis].map(oldSushi => {
+          return oldSushi.id === eatenSushi.id ? eatenSushi : oldSushi
         }),
         eaten: [...this.state.eaten, "plate"],
-        moneyLeft: this.state.moneyLeft - sushi.price
+        moneyLeft: this.state.moneyLeft - eatenSushi.price 
       })
-
-    })
   }
 
   toggleMoneyForm = () => {
@@ -89,10 +75,10 @@ class App extends Component {
   }
 
   render() {
-    const {sushis, start, end, eaten, moneyLeft, moneyForm } = this.state
+    const {start, end, eaten, moneyLeft, moneyForm, displaySushis } = this.state
     return (
       <div className="app">
-        <SushiContainer sushis={sushis.slice(start, end)} moreSushi={this.moreSushi} eatSushi={this.eatSushi}/>
+        <SushiContainer sushis={displaySushis.slice(start, end)} moreSushi={this.moreSushi} eatSushi={this.eatSushi}/>
         <Table eaten={ eaten } moneyLeft={ moneyLeft } toggleMoneyForm={this.toggleMoneyForm} moneyForm={moneyForm} addMoney={this.addMoney}/>
       </div>
     );

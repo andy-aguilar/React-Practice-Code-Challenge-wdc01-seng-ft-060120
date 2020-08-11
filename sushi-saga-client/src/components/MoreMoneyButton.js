@@ -2,7 +2,7 @@ import React from 'react'
 
 const MoreMoneyButton = (props) => {
     return <button onClick={props.toggleMoneyForm}>
-            Add $$
+            Add $ Form
         </button>
 }
 
